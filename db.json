@@ -1,0 +1,29 @@
+{
+  "notes": [
+    {
+      "content": "The Strong will live and the weak shall die",
+      "important": false,
+      "id": 1
+    },
+    {
+      "content": "Unfalsifiable beliefs are vacouos",
+      "important": false,
+      "id": 2
+    },
+    {
+      "content": "Now I am become death, destroyer of worlds",
+      "important": false,
+      "id": 3
+    },
+    {
+      "content": "The quick brown fox jumps over the lazy dog",
+      "important": false,
+      "id": 4
+    },
+    {
+      "content": "I love Carmela very much forever and ever'",
+      "important": true,
+      "id": 5
+    }
+  ]
+}
