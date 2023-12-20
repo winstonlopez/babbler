@@ -12,7 +12,7 @@ const Create = ({ handleCreate, setNewNote, newNote,setImportant }) => {
     return ( 
         
             <form onSubmit={handleCreate} className="create">
-                <label htmlFor="note">Say Something:
+                <label htmlFor="note">Whats the latest?
                     <input type="text" id="note" value={newNote} onChange={handleNoteChange} required/>
                 </label>
                 <label htmlFor="important">Important

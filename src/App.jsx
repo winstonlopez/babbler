@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Banner from './components/Banner'
 import Create from './components/Create'
 import ErrorMessage from './components/ErrorMessage'
 import Notes from './components/Notes'
@@ -83,6 +84,7 @@ function App() {
 
   return (
     <div className='main'>
+      <Banner />
       <ErrorMessage message={errorMessage} />
       <Create setNewNote={setNewNote} handleCreate={handleCreate} newNote={newNote} setImportant={setImportant}/>
       <header>
