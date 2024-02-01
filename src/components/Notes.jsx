@@ -1,23 +1,23 @@
 const Notes = ({ note, showAll, toggleImportance, handleDelete }) => {
 
-    const label = !note.important ? <img src="./heart.svg"></img> : <img src='./unlike.svg'></img>
+    const label = !note.important ? <img src="./unlike.svg"></img> : <img src='./heart.svg'></img>
 
     if(showAll){
     return (
-        <li className={note.important ? 'list-child important' : 'list-child'}>
+        <div className={note.important ? 'list-child important' : 'list-child'}>
             {note.content}
             <button className="note-important-btn" onClick={toggleImportance}>{label}</button>
             <button onClick={handleDelete} className="delete"><img src="./delete.svg"></img></button>
-        </li>
+        </div>
     )}else if(note.important){
         return (
-            <li className={note.important ? 'list-child important' : 'list-child'}>
+            <div className={note.important ? 'list-child important' : 'list-child'}>
             {note.content}
             <button className="note-important-btn" onClick={toggleImportance}>{label}</button>
             <button onClick={ handleDelete } className="delete"><img src="./delete.svg"></img></button>
-            </li>
+            </div>
         )
     }else return undefined
 }
  
-export default Notes;
+export default Notes

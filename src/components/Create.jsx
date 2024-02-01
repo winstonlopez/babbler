@@ -1,26 +1,36 @@
-import {useState} from 'react'
-const Create = ({ handleCreate, setNewNote, newNote,setImportant }) => {
+import { useState } from 'react'
+import PropTypes from 'prop-types'
 
-    const handleChange = (event)=> {
-        event.target.checked? setImportant(true) : setImportant(false)
-    }
+const Create = ({ addNote, user }) => {
 
-    const handleNoteChange = (event)=>{
-        setNewNote(event.target.value)
+
+    const [newNote, setNewNote] = useState('')
+
+    const handleCreate = (event) => {
+        event.preventDefault()  
+        addNote({
+            content: newNote,
+            important: true
+        })
+        
+        setNewNote('')
     }
+    
 
     return ( 
-        
+
             <form onSubmit={handleCreate} className="create">
-                <label htmlFor="note">Whats the latest?
-                    <input type="text" id="note" value={newNote} onChange={handleNoteChange} required/>
-                </label>
-                <label htmlFor="important">Important
-                    <input type="checkbox" name="important" id="important" onChange={ handleChange }/>
+                <label htmlFor="note">{user}:
+                    <input type="text" id="note" value={newNote} onChange={event => setNewNote(event.target.value)} required/>
                 </label>
                 <button type="submit">Submit</button>
             </form>
-     );
+     )
+}
+
+Create.proptypes = {
+    addNote: PropTypes.func.isRequired,
+    user: PropTypes.string.isRequired
 }
  
-export default Create;
+export default Create

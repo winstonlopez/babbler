@@ -1,77 +1,110 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Banner from './components/Banner'
 import Create from './components/Create'
 import ErrorMessage from './components/ErrorMessage'
+import Login from './components/Login'
 import Notes from './components/Notes'
 import Show from './components/Show'
 import noteService from './services/notes'
+import loginService from './services/login'
+import Togglable from './components/Togglable'
 
 function App() {
 
   const [notes, setNotes] = useState(null)
   const [showAll, setShowAll] = useState(true)
-  const [newNote, setNewNote] = useState(``)
-  const [important, setImportant] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [user, setUser] = useState(null)
+  const noteFormRef = useRef()
 
 
-
-  useEffect(()=>{
+  useEffect(() => {
+    //check if previosly logged on
     noteService
         .getAll()
         .then(initialNotes => setNotes(initialNotes))
   }, [])
 
-  const toggleImportance = (id)=> {
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+
+    if(loggedUserJSON){
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      noteService.setToken(user.token)
+    }
+  }, [])
+
+  const login = async (username, password) => {
+    
+    try {
+      const user = await loginService.login({
+        username, password
+      })
+
+      window.localStorage.setItem(
+        'loggedNoteappUser', JSON.stringify(user)
+      )
+
+      noteService.setToken(user.token)
+      setUser(user)
+
+    } catch(exception) {
+      setErrorMessage('Wrong Credentials')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 3000)
+    }
+
+  }
+
+
+  const toggleImportance = (id) => {
         
         //Find the note that needs to be changed
         const note = notes.find(n => n.id === id)
         //create a deep copy of the note object, using spread syntax, change the importance
-        const changedNote = {...note, important: !note.important}
+        const changedNote = { ...note, important: !note.important }
 
         noteService
           .update(id, changedNote)
           .then(data => setNotes(notes.map(note => note.id !== id ? note : data)))
           .catch(err => {
-            setNotes(notes.filter(n => n.id !== id))
-            setErrorMessage('Some Error Happened')
-            setTimeout(()=>setErrorMessage(null), 3000)
+            setErrorMessage('Some Error Happened', err)
+            setTimeout(() => setErrorMessage(null), 3000)
           })
   }
 
-  const handleCreate = (event)=> {
-    event.preventDefault()
+  const addNote = (noteObject) => {  //function for adding notes to the db
     
-    const newObject ={
-      content: newNote,
-      important: important
-    }
+    noteFormRef.current.toggleVisibility()  //use the ref
 
-    
     noteService
-      .create(newObject)
-      .then(response => {
-        console.log([response.data, ...notes])
-        setNotes([response.data, ...notes])
-        setNewNote('')
-        document.getElementById(`note`).focus()
+      .create(noteObject)
+      .then(data => {
+        console.log(data)
+        setNotes([data, ...notes])
+      })
+      .catch(error => {
+        console.log(error)
+        window.localStorage.clear()
+        setUser(null)
       })
     
   }
 
-  const handleDelete = (id)=> {
-    const del = ()=> {
+  const handleDelete = (id) => {
+    const del = () => {
         return (
           noteService.remove(id)
-               .then((response)=> {
+               .then((response) => {
+                  console.log(response)
                   let cutNotes = notes.filter(n => response.data.id !== n.id)
                   setNotes(cutNotes)
                })
                .catch(err => {
-                  console.log(err, `note is not on the server`)
-                  setNotes(notes.filter(n => n.id !== id))
                   setErrorMessage('Some Error Happened')
-                  setTimeout(()=>{
+                  setTimeout(() => {
                     setErrorMessage(null)
                   },3000)
                })
@@ -84,14 +117,24 @@ function App() {
 
   return (
     <div className='main'>
-      <Banner />
+      <Banner setUser={ setUser } user={ user } login={ login }/>
       <ErrorMessage message={errorMessage} />
-      <Create setNewNote={setNewNote} handleCreate={handleCreate} newNote={newNote} setImportant={setImportant}/>
-      <header>
+      {user === null 
+        ? (
+            <span></span>
+          )
+        : (
+              <Togglable buttonLabel="Add New Note" ref={noteFormRef}>
+                <Create addNote={addNote} user={user.name}/>
+              </Togglable>
+          )
+      }
+      
+      <div className='postTitle'>
       <h2 className='note-title'>Posts</h2>
 
       <Show showAll={ showAll } setShowAll={ setShowAll }/>
-      </header>
+      </div>
       
         <div className='list-parent'>
         {
