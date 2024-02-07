@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 
-const Create = ({ addNote, user }) => {
+const Create = ({ addNote }) => {
 
 
     const [newNote, setNewNote] = useState('')
 
+    const user = JSON.parse(window.localStorage.getItem('loggedNoteappUser')).name
+
     const handleCreate = (event) => {
         event.preventDefault()  
-        addNote({
+        console.log(user)
+        addNote({   //located at App.jsx
             content: newNote,
             important: true
         })
