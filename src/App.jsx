@@ -15,6 +15,7 @@ function App() {
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
   const [user, setUser] = useState(null)
+  const [loginPage, setLoginPage] = useState(false)
   const noteFormRef = useRef()
 
 
@@ -42,12 +43,15 @@ function App() {
         username, password
       })
 
-      window.localStorage.setItem(
-        'loggedNoteappUser', JSON.stringify(user)
-      )
+      if(user){
+        window.localStorage.setItem(
+          'loggedNoteappUser', JSON.stringify(user)
+        )
+      }
 
       noteService.setToken(user.token)
       setUser(user)
+      setLoginPage(false)
 
     } catch(exception) {
       setErrorMessage('Wrong Credentials')
@@ -82,8 +86,7 @@ function App() {
     noteService
       .create(noteObject)
       .then(data => {
-        console.log(data)
-        setNotes([data, ...notes])
+        setNotes([...notes, data])
       })
       .catch(error => {
         console.log(error)
@@ -114,35 +117,39 @@ function App() {
     window.confirm('Delete Note?') ? del() : null
     
   }
+  if(loginPage){
+    return <Login login={login} />
+  }
 
   return (
-    <div className='main'>
-      <Banner setUser={ setUser } user={ user } login={ login }/>
-      <ErrorMessage message={errorMessage} />
-      {user === null 
-        ? (
-            <span></span>
-          )
-        : (
-              <Togglable buttonLabel="Add New Note" ref={noteFormRef}>
-                <Create addNote={addNote} user={user.name}/>
-              </Togglable>
-          )
-      }
-      
-      <div className='postTitle'>
-      <h2 className='note-title'>Posts</h2>
-
-      <Show showAll={ showAll } setShowAll={ setShowAll }/>
-      </div>
-      
-        <div className='list-parent'>
-        {
-          notes ? notes.map(note => <Notes key={ note.id } note={ note } showAll={showAll} toggleImportance={()=>toggleImportance(note.id)} handleDelete={()=>handleDelete(note.id)}/>) : <h3>Loading...</h3>
+    
+      <div className='main'>
+        <Banner setUser={ setUser } user={ user } login={ login } setLoginPage={setLoginPage}/>
+        <ErrorMessage message={errorMessage} />
+        {user === null 
+          ? (
+              <span></span>
+            )
+          : (
+                <Togglable buttonLabel="Add New Note" ref={noteFormRef}>
+                  <Create addNote={addNote} user={user.name}/>
+                </Togglable>
+            )
         }
+        
+        <div className='postTitle'>
+        <h2 className='note-title'>Posts</h2>
+
+        
         </div>
-      
-    </div>
+        
+          <div className='list-parent'>
+          {
+            notes ? notes.map(note => <Notes key={ note.id } note={ note } showAll={showAll} toggleImportance={() => toggleImportance(note.id)} handleDelete={() => handleDelete(note.id)} setUser = { setUser }/>) : <h3>Loading...</h3>
+          }
+          </div>
+        
+      </div>
   )
 }
 

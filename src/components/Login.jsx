@@ -18,22 +18,19 @@ const Login = ({ login }) => {
     return ( 
         <div className="login">
             <form onSubmit={handleLogin}>
-                <div>
-                <label htmlFor="name">
-                    username:
-                        <input 
-                            type="text"
-                            id="name"
-                            value={username}
-                            name="Username"
-                            placeholder="Username"
-                            onChange={({ target }) => setUsername(target.value)}
-                        />
-                </label>
+                <h1>Welcome to AnonDroid Blogs</h1>
+                <div className='input-box'>
+                    <input 
+                        type="text"
+                        id="name"
+                        value={username}
+                        name="Username"
+                        placeholder="Username"
+                        onChange={({ target }) => setUsername(target.value)}
+                    />
+                    <i className='bx bxs-user'></i>
                 </div>
-                <div>
-                <label htmlFor="password">
-                    password:
+                <div className='input-box'>
                         <input 
                             type="password"
                             id="password"
@@ -42,10 +39,20 @@ const Login = ({ login }) => {
                             placeholder="password"
                             onChange={({ target }) => setPassword(target.value)} 
                         />
-                </label>
+                        <i className='bx bxs-lock-alt' ></i>
+                </div>
+                <div className="remember-forgot">
+                    <label htmlFor="remember">
+                        <input type="checkbox" name="checkbox" id="remember" />Remember me
+                    </label>
+                    <a href="#">Forgot Password</a>
                 </div>
                 <div>
                     <button type="submit">login</button>
+                </div>
+
+                <div className="register-link">
+                    <p>Don't have an account? <a href="#">Register</a></p>
                 </div>
             </form>
         </div>
