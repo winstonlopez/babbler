@@ -4,11 +4,12 @@ const Notes = ({ note, toggleImportance, handleDelete }) => {
     const user = loggedUser ? loggedUser.name : 'anonymous'
     const label = !note.important ? <img src="./unlike.svg"></img> : <img src='./heart.svg'></img>
     
+    // console.log(note.user)
     return (
         <div className={'list-child'}>
             <div className="listBanner">
                 <span className="userProfile">
-                <span className="profilePicture">Image</span>
+                <span className="profilePicture"><img src='/images/user-circle.png' alt="" /></span>
                 <span className="profileName">{ note.user.name ||  user}</span>
                 </span>
             </div>
