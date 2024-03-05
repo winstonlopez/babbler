@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
+import { useNavigate, Link } from 'react-router-dom'
 
 const Login = ({ login }) => {
+
+    const navigate = useNavigate()
 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -13,6 +16,7 @@ const Login = ({ login }) => {
         
         setUsername('')
         setPassword('')
+        navigate('/')
     }
 
     return ( 
@@ -52,7 +56,7 @@ const Login = ({ login }) => {
                 </div>
 
                 <div className="register-link">
-                    <p>Don't have an account? <a href="#">Register</a></p>
+                    <p>Don't have an account? <Link to='/register'>Register</Link></p>
                 </div>
             </form>
         </div>

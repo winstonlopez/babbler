@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
-
+import { useNavigate } from 'react-router-dom'
 const Create = ({ addNote }) => {
 
+    const navigate = useNavigate()
 
     const [newNote, setNewNote] = useState('')
 
@@ -17,15 +18,18 @@ const Create = ({ addNote }) => {
         })
         
         setNewNote('')
+        navigate('/')
+
     }
     
 
     return ( 
 
             <form onSubmit={handleCreate} className="create">
-                <label htmlFor="note">{user}:
-                    <input type="text" id="note" value={newNote} onChange={event => setNewNote(event.target.value)} required/>
-                </label>
+                <h2>Create New Post</h2>
+                <div className='inputField'>
+                <input type="text" id="note" value={newNote} onChange={event => setNewNote(event.target.value)} required/>
+                </div>
                 <button type="submit">Submit</button>
             </form>
      )
