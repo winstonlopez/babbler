@@ -6,29 +6,39 @@ import Login from './components/Login'
 import Notes from './components/Notes'
 import noteService from './services/notes'
 import loginService from './services/login'
-import Togglable from './components/Togglable'
-import register from './services/register'
 
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
+import userService from './services/register'
+
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Register from './components/Register'
+import User from './components/User'
 
 function App() {
 
-  const [notes, setNotes] = useState(null)
+
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
   const [user, setUser] = useState(null)
-  const [loginPage, setLoginPage] = useState(false)
+  const [sessionExpired, setSessionExpired] = useState(false)
   const [menuOut, setMenuOut] = useState(false)
 
   const queryClient = useQueryClient()
 
   const result = useQuery({
     queryKey: ['notes'],
-    queryFn: noteService.getAll
+    queryFn: noteService.getAll,
+    refetchInterval: 60000
   })
+
+  const users = useQuery({
+    queryKey: ['users'],
+    queryFn: userService.getUsers
+  })
+
+  // console.log(users.data)
+  console.log(users.status)
 
   // console.log(JSON.parse(JSON.stringify(result)))
   let { data, status } = result
@@ -72,7 +82,7 @@ function App() {
 
       noteService.setToken(user.token)
       setUser(user)
-      setLoginPage(false)
+      setSessionExpired(false)
 
     } catch(exception) {
       setErrorMessage('Wrong Credentials')
@@ -84,20 +94,32 @@ function App() {
   }
 
   const ToggleImportanceMutation = useMutation({
-    mutationFn: noteService.update,
+    mutationFn: noteService.like,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] })
-      console.log('query key invalidated')
     }
   })
 
+  const dislikeMutation = useMutation({
+    mutationFn: noteService.dislike,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+    }
+  })
 
+  const handleDislike = (id) => {
+
+    const note = data.find(n => n.id === id)
+
+    return dislikeMutation.mutateAsync({ id, note })
+  }
   const toggleImportance = (id) => {
         
         //Find the note that needs to be changed
         const note = data.find(n => n.id === id)
+        // console.log(note, id)
         //create a deep copy of the note object, using spread syntax, change the importance
-        const changedNote = { ...note, important: !note.important }
+        // const changedNote = { ...note, important: !note.important }
       //--------------under change----------------------
         // noteService
         //   .update(id, changedNote)
@@ -107,7 +129,7 @@ function App() {
         //     setTimeout(() => setErrorMessage(null), 3000)
         //   })
       //---------------------------------------------------
-      ToggleImportanceMutation.mutate({ id, changedNote })
+      return ToggleImportanceMutation.mutateAsync({ id, note })
   }
 
   const addNoteMutation = useMutation({
@@ -132,9 +154,10 @@ function App() {
     //   })
     //------------------------------------------
 
-    const content = noteObject
-    addNoteMutation.mutate({ content })
+        const content = noteObject
+        return addNoteMutation.mutateAsync({ content })
 
+    
   }
 
   const deleteMutation = useMutation({
@@ -164,22 +187,29 @@ function App() {
     //     )
     // }
     //--------------------------------------
+    // console.log(id)
 
-    const del = () => {
-      deleteMutation.mutate({ id })
-    }
 
-    window.confirm('Delete Note?') ? del() : null
+    return deleteMutation.mutateAsync({ id })
     
   }
 
-  const handleMenu = (event) => {
-    console.log(event.target)
+  const menuHandler = (event) => {
+    if(event.target.closest('span.user-area')){
+      if(menuOut){//click inside
+
+        setMenuOut(!menuOut)
+      }else{
+
+        setMenuOut(true)
+      }
+      }else{
+        setMenuOut(false)
+
+      }
+
   }
 
-  if(loginPage){
-    return <Login login={login} />
-  }
 
   return (
       <Router>
@@ -213,20 +243,29 @@ function App() {
           <Routes>
             <Route path='/login' element={<Login login={login}/>}/>
             <Route path='/post' element={
-              <div className='main' onClick={handleMenu}>
-                <Banner setUser={ setUser } user={ user } login={ login } setLoginPage={setLoginPage}/>
-                <Create addNote={addNote}/>
+              <div className='main' onClick={(event) => menuHandler(event)}>
+                <Banner setUser={ setUser } user={ user } menuOut={menuOut}/>
+                <Create addNote={addNote} sessionExpired={sessionExpired}/>
               </div>
               } />
-            <Route path='/register' element={<Register register={register}/>} />
+            <Route path='/register' element={<Register register={userService.register}/>} />
             <Route path='/' element={
-              <div className='main'>
-                <Banner setUser={ setUser } user={ user } login={ login } setLoginPage={setLoginPage} menuOut={menuOut} setMenuOut={setMenuOut}/>
-                <div className="content-container">
-                {data ? data.map(note => <Notes key={ note.id } note={ note } showAll={showAll} toggleImportance={() => toggleImportance(note.id)} handleDelete={() => handleDelete(note.id)} setUser = { setUser }/>) : <h3>Loading...</h3>}
+                <div className='main' onClick={(event) => menuHandler(event)}>
+                    <Banner setUser={ setUser } user={ user }  menuOut={menuOut}/>
+                    <div className="content-container">
+                    {data && users.status === 'success'? data.map(note => <Notes key={ note.id } note={ note } handleDislike={() => handleDislike(note.id)} toggleImportance={() => toggleImportance(note.id)} handleDelete={() => handleDelete(note.id)} setUser = { setUser } users={users.data} sessionExpired={sessionExpired}/>) : <h3>Loading...</h3>}
+                    </div>
                 </div>
-              </div>
               } />
+              <Route path='/user/:id' element={status === 'success'
+                ? (
+                <div className='main' onClick={(event) => menuHandler(event)}>
+                  <Banner setUser={ setUser } user={ user }  menuOut={menuOut} />
+                  <User user={ user } showAll={showAll} toggleImportance={toggleImportance} handleDelete={handleDelete} setUser = { setUser } users={users.data}/>
+                </div>
+               
+                )
+                : <div>Loading...</div>} />
           </Routes>
           
       

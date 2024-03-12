@@ -1,10 +1,10 @@
 
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom"
-import { useState } from 'react'
+import {  Link } from 'react-router-dom'
 
-const Banner = ({ setUser, user, setLoginPage, menuOut, setMenuOut }) => {
 
-    const [visible, setVisible] = useState(false)
+const Banner = ({ setUser, user, menuOut }) => {
+
+
 
     const hideWhenVisible = { display : menuOut ? '' : 'none' }
     const menuPressed = { backgroundColor: menuOut ? '#3498DB' : '' }
@@ -12,11 +12,6 @@ const Banner = ({ setUser, user, setLoginPage, menuOut, setMenuOut }) => {
     const handleLogout = () => {
         window.localStorage.removeItem('loggedNoteappUser')
         setUser(null)
-    }
-
-    const handleLogin = () => {
-        console.log('logging in')
-        setLoginPage(true)
     }
 
 
@@ -27,11 +22,13 @@ const Banner = ({ setUser, user, setLoginPage, menuOut, setMenuOut }) => {
                     <div className="menuButtons">
 
                         <Link to='/'><img src="./images/roboskull.png" alt="logo" id="logo"/></Link>
-                        {user ? <Link to='/post' className="createNew">Create</Link> : null}
+                        
                         {user
-                             ? <span className="user-area"  onClick={() => setMenuOut(!menuOut)} style={menuPressed}>
+                             ? <span className="user-area" style={menuPressed}>
                                 <p>{user.name}</p><img src="/images/user-circle.png" alt="user" />
                                 <div className="userMenu" style={hideWhenVisible}>
+                                    {user ? <Link to='/post'><p>Create Post</p></Link> : null}
+                                    {user? <Link to={`/user/${user.userId}`}><p>Profile</p></Link> : null}
                                     <p onClick={handleLogout}>Logout</p>
                                 </div>
                                 </span>

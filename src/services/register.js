@@ -10,4 +10,9 @@ const register = async (credentials) => {
     return response.data
 }
 
-export default register
+const getUsers = async () => {
+    const response = await axios.get(baseUrl)
+    return response.data
+}
+
+export default { register, getUsers }
