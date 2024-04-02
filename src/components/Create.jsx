@@ -1,9 +1,26 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
-const Create = ({ addNote, sessionExpired }) => {
+
+const useField = (type) => {
+    const [value, setValue] = useState('')
+
+    const onChange = (event) => {
+        setValue(event.target.value)
+    }
+
+    return {
+        type,
+        value,
+        onChange
+    }
+}
+
+const Create = ({ addNote }) => {
 
     const navigate = useNavigate()
+
+    const noteField = useField('text')
 
     const [newNote, setNewNote] = useState('')
 
@@ -13,7 +30,7 @@ const Create = ({ addNote, sessionExpired }) => {
         event.preventDefault()  
         
         addNote({   //located at App.jsx
-            content: newNote,
+            content: noteField.value,
             important: true
         })
         .then(data => {
@@ -38,11 +55,11 @@ const Create = ({ addNote, sessionExpired }) => {
     return ( 
 
             <form onSubmit={handleCreate} className="create">
-                <h2>Create New Post</h2>
+
                 <div className='inputField'>
-                <input type="text" id="note" value={newNote} onChange={event => setNewNote(event.target.value)} required/>
-                </div>
+                <textarea id="note" {...noteField} placeholder='what is on your mind?' required/>
                 <button type="submit">Submit</button>
+                </div>
             </form>
      )
 }

@@ -21,18 +21,20 @@ const Banner = ({ setUser, user, menuOut }) => {
             
                     <div className="menuButtons">
 
-                        <Link to='/'><img src="./images/roboskull.png" alt="logo" id="logo"/></Link>
+                        <Link to='/'><img src="/logo.svg" alt="logo" className="logo"/></Link>
                         
                         {user
                              ? <span className="user-area" style={menuPressed}>
-                                <p>{user.name}</p><img src="/images/user-circle.png" alt="user" />
+                                <p>{user.name}</p><img src="/userBig.svg" alt="user" />
                                 <div className="userMenu" style={hideWhenVisible}>
                                     {user ? <Link to='/post'><p>Create Post</p></Link> : null}
-                                    {user? <Link to={`/user/${user.userId}`}><p>Profile</p></Link> : null}
+                                    {user? <Link to={`/users/${user.userId}`}><p>Profile</p></Link> : null}
                                     <p onClick={handleLogout}>Logout</p>
                                 </div>
                                 </span>
-                             : <Link to='/login'>Login</Link>}
+                             : <span className='login-link'><Link to='/login'>login</Link>/<Link to='/register'>sign up</Link></span>
+                             }
+                        
                     </div>
 
             

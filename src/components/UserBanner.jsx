@@ -98,7 +98,7 @@ const UserBanner = ({ author, note, handleDelete }) => {
     return ( 
         <div>
             <div className="listBanner">
-                <Link to={`/user/${author.id}`}>
+                <Link to={`/users/${author.id}`}>
                 <span className="userProfile">
                 <span className="profilePicture"><img src='/images/user-circle.png' alt="profile picture" /></span>
                 <span className="profileName">
@@ -108,7 +108,7 @@ const UserBanner = ({ author, note, handleDelete }) => {
                 </span>
                 </Link>
                 {loggedUser
-                ? note.user.name === loggedUser.name && <button onClick={() => deletehandler(note.id)} className="delete"><img src="./delete.svg"></img></button>
+                ? (note.user.name === loggedUser.name || loggedUser.username === 'superuser') && <button onClick={() => deletehandler(note.id)} className="delete"><img src="/delete.svg"></img></button>
                 : <span></span>
                 }
             </div>

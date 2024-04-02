@@ -61,6 +61,7 @@ const like = async ({ id, note }) => {
    // console.log(note)
 
    const response = await axios.put(`${baseURL}/${id}`, note, config )
+   console.log(response.data)
    return response.data
 }
 
@@ -70,6 +71,8 @@ const dislike = async ({ id, note }) => {
    }
 
    const liker = JSON.parse(window.localStorage.getItem('loggedNoteappUser')).userId
+
+   
    
    //check if user liked the post
   const liked = note.likes.find(item => item === liker)

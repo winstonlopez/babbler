@@ -1,5 +1,4 @@
 import { useParams } from 'react-router-dom'
-import Notes from './Notes'
 
 
 const User = ({  users  }) => {
@@ -7,18 +6,18 @@ const User = ({  users  }) => {
 
     console.log(users)
     const id = useParams().id
-    // console.log(users)
     const person = users.find(u => u.id === id)
+    console.log(person)
 
     return ( 
-        <div className="userContent">
-            <div className="name">
-                <h2>{person.name}</h2>
-            </div>
-            <div className="user-notes">
-                {
-                person.notes.map(n => <div key={n.id}>custom contents</div>)
-                }
+        <div className='userContentContainer'>
+            <div className="userContent">
+                <div className="name">
+                    <div className="imageContainer">
+                    <img src="/userBig.svg" alt="profile" />
+                    </div>
+                    <h2>{person.name}</h2>
+                </div>
             </div>
         </div>
      )

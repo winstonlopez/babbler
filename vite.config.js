@@ -6,10 +6,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': {
+      '/api': { //replace if starts with api
         target: 'http://localhost:3001',
         changeOrigin: true,
       },
-    }
+    },
+    historyApiFallback: true,
+    contentBase: '/',
+    hot: true
   },
 })

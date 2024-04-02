@@ -14,37 +14,85 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate } f
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Register from './components/Register'
 import User from './components/User'
+import Menu from './components/Menu'
+
+import { useReducer } from 'react'
+
+
+
+// const sortReducer = (state, action) => {
+ 
+//   switch (action.type) {
+//     case 'new':
+//       console.log('new sort')
+
+//       return state.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
+//     case 'top':
+//       console.log('top sort')
+
+//       return  state.sort((a,b) => {
+//         return (b.likes.length - b.dislikes.length) - (a.likes.length - a.dislikes.length)
+//       })
+//     case 'controversial':
+//       console.log('controversial sort')
+
+//       return state.sort((a,b) => {
+//         return (a.likes.length - a.dislikes.length) - (b.likes.length - b.dislikes.length)
+//       })
+//       case 'set':
+//         console.log('initial data set')
+//         state = action.payload
+//         return state
+//     default:
+//       return state
+//   }
+// }
+
+
+
 
 function App() {
 
 
-  const [showAll, setShowAll] = useState(true)
+
   const [errorMessage, setErrorMessage] = useState(null)
   const [user, setUser] = useState(null)
   const [sessionExpired, setSessionExpired] = useState(false)
   const [menuOut, setMenuOut] = useState(false)
-
+  const [sort, setSort] = useState('new')
+  const [refresh, setRefresh] = useState(false)
   const queryClient = useQueryClient()
 
   const result = useQuery({
     queryKey: ['notes'],
     queryFn: noteService.getAll,
-    refetchInterval: 60000
+
   })
 
   const users = useQuery({
     queryKey: ['users'],
-    queryFn: userService.getUsers
+    queryFn: userService.getUsers,
+
   })
 
-  // console.log(users.data)
-  console.log(users.status)
 
   // console.log(JSON.parse(JSON.stringify(result)))
   let { data, status } = result
-  console.log(status)
-
   
+
+
+  // const [sorted, sortDispatch] = useReducer(sortReducer, data)
+
+  // console.log(sorted)
+
+  // useEffect(() => {
+  //   sortDispatch({
+  //     type: 'set',
+  //     payload: data
+  //   })
+  // }, [data])
+  
+
   //---We will use qetQuery instead to ensure data is upto date in the server
   //------------Under Replacement----------------------
   // useEffect(() => {
@@ -92,6 +140,7 @@ function App() {
     }
 
   }
+
 
   const ToggleImportanceMutation = useMutation({
     mutationFn: noteService.like,
@@ -209,12 +258,32 @@ function App() {
       }
 
   }
+    
+
+    if(status === 'success'){
+      if(sort === 'new'){
+        data.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
+      }
+      if(sort === 'top'){
+        data.sort((a,b) => {
+          return (b.likes.length - b.dislikes.length) - (a.likes.length - a.dislikes.length)
+        })
+      }
+      if(sort === 'controversial'){
+        data.sort((a,b) => {
+          return (a.likes.length - a.dislikes.length) - (b.likes.length - b.dislikes.length)
+        })
+      }
+    }
+
 
 
   return (
       <Router>
-        
+      
         <ErrorMessage message={errorMessage} />
+
+
 
 {/*         
         {user === null 
@@ -252,18 +321,23 @@ function App() {
             <Route path='/' element={
                 <div className='main' onClick={(event) => menuHandler(event)}>
                     <Banner setUser={ setUser } user={ user }  menuOut={menuOut}/>
+                    {data && <Menu setSort={setSort} sort={sort} data={data} setRefresh={setRefresh}/>}
                     <div className="content-container">
                     {data && users.status === 'success'? data.map(note => <Notes key={ note.id } note={ note } handleDislike={() => handleDislike(note.id)} toggleImportance={() => toggleImportance(note.id)} handleDelete={() => handleDelete(note.id)} setUser = { setUser } users={users.data} sessionExpired={sessionExpired}/>) : <h3>Loading...</h3>}
                     </div>
+
                 </div>
               } />
-              <Route path='/user/:id' element={status === 'success'
+              <Route path='/users/:id' element={status === 'success' && users
                 ? (
                 <div className='main' onClick={(event) => menuHandler(event)}>
                   <Banner setUser={ setUser } user={ user }  menuOut={menuOut} />
-                  <User user={ user } showAll={showAll} toggleImportance={toggleImportance} handleDelete={handleDelete} setUser = { setUser } users={users.data}/>
+                  {users.status ==='success' && data ? <User user={ user } toggleImportance={toggleImportance} handleDelete={handleDelete} setUser = { setUser } users={users.data}/>: <h3>Loading</h3>}
+                  <div className="content-container">
+                  {data && users.status === 'success'? data.map(note => <Notes key={ note.id } note={ note } handleDislike={() => handleDislike(note.id)} toggleImportance={() => toggleImportance(note.id)} handleDelete={() => handleDelete(note.id)} setUser = { setUser } users={users.data} sessionExpired={sessionExpired}/>) : <h3>Loading...</h3>}
+                    </div>
                 </div>
-               
+                
                 )
                 : <div>Loading...</div>} />
           </Routes>

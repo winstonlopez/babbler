@@ -2,46 +2,60 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { useNavigate, Link } from 'react-router-dom'
 
+const useField = (type) => {
+    const [value, setValue] = useState('')
+
+    const onChange = (event) => {
+        setValue(event.target.value)
+    }
+
+    return {
+        type,
+        value,
+        onChange
+    }
+}
+
 const Login = ({ login }) => {
 
     const navigate = useNavigate()
-
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
+    const username = useField('text')
+    const password = useField('password')
+    // const [username, setUsername] = useState('')
+    // const [password, setPassword] = useState('')
 
     const handleLogin = (event) => {
         event.preventDefault()
 
-        login(username, password)
+        login(username.value, password.value)
         
-        setUsername('')
-        setPassword('')
+        // username.onChange('')
+        // password.onChange('')
         navigate('/')
     }
 
     return ( 
         <div className="login">
             <form onSubmit={handleLogin}>
-                <h1>Welcome to AnonDroid Blogs</h1>
+                <div><Link to='/'><img src='/logo.svg' className='logo'/></Link></div>
+                <h3>let your fun ideas and contents be heard</h3>
                 <div className='input-box'>
                     <input 
-                        type="text"
+                        {...username}
                         id="name"
-                        value={username}
                         name="Username"
                         placeholder="Username"
-                        onChange={({ target }) => setUsername(target.value)}
+                        
                     />
                     <i className='bx bxs-user'></i>
                 </div>
                 <div className='input-box'>
                         <input 
-                            type="password"
+                            {...password}
                             id="password"
-                            value={password}
                             name="Password"
                             placeholder="password"
-                            onChange={({ target }) => setPassword(target.value)} 
+                             
                         />
                         <i className='bx bxs-lock-alt' ></i>
                 </div>
@@ -49,7 +63,7 @@ const Login = ({ login }) => {
                     <label htmlFor="remember">
                         <input type="checkbox" name="checkbox" id="remember" />Remember me
                     </label>
-                    <a href="#">Forgot Password</a>
+                    {/* <a href="#">Forgot Password</a> */}
                 </div>
                 <div>
                     <button type="submit">login</button>

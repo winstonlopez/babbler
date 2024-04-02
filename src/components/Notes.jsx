@@ -1,35 +1,53 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import UserBanner from './UserBanner'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const Notes = ({ note, toggleImportance, handleDelete, users, handleDislike }) => {
 
 
     const navigate = useNavigate()
     const author = note.user
+    const id = useParams().id
+
+
+
 
     const handleLike = () => {
+        const loggedUser = window.localStorage.getItem('loggedNoteappUser')
+        if(!loggedUser){
+            alert('please login to vote')
+            navigate('/login')
+        }
         toggleImportance()
             .then(response => console.log(response))
             .catch(error => {
+                console.log(error)
                 if(error.response.data.error === 'Token Expired'){
                     alert('session expired')
                     navigate('/login')
-                    
                 }
             })
     }
 
     const dislikeHandler = () => {
-        console.log('this handler works')
+
+        const loggedUser = window.localStorage.getItem('loggedNoteappUser')
+        if(!loggedUser){
+            alert('please login to vote')
+            navigate('/login')
+        }
+
         handleDislike()
-            .then(response => console.log(response))
+            .then(response => null)
             .catch(error => {
+                console.log(error)
                 if(error.response.data.error === 'Token Expired'){
                     alert('session expired')
                     navigate('/login')
                     
+                }else{
+                    navigate('/login')
                 }
             })
     }
@@ -50,8 +68,8 @@ const Notes = ({ note, toggleImportance, handleDelete, users, handleDislike }) =
     const userId =  loggedUser ? loggedUser.userId : 'null'
     const liked = note.likes.find(item => item === userId)
     const disliked = note.dislikes.find(item => item === userId)
-    const likeLabel = !liked ? <img src="./heart.png"></img> : <img src='./heart.svg'></img>
-    const disLike = !disliked ? <img src='./dislike.svg'></img> : <img src='./disliked.svg' />
+    const likeLabel = !liked ? <img src="/bx-upvote.svg"></img> : <img src='/bx-upvoted.svg'></img>
+    const disLike = !disliked ? <img src='/bx-downvote.svg'></img> : <img src='/bx-downvoted.svg' />
     let userLikes = []
 
     for(let i = 0; i < note.likes.length; i++){
@@ -66,7 +84,67 @@ const Notes = ({ note, toggleImportance, handleDelete, users, handleDislike }) =
     if(userLikes.length > 2){
         userLikesDisplay = userLikesDisplay.concat({ name: ' and others..' })
     }
+//for specific user
+    if(id){
+        if(note.user.id !== id){
+            return null
+        }else{
+            return (
+        
+                <div className={'list-child'}>
+        
+                    <UserBanner note={note} author={author} handleDelete={handleDelete}/>
+                   
+                    <div className="listContent">
 
+                    {note.content}
+                    </div>
+        
+                    <div className="listFooter">
+                        <div className="likes">
+             
+                            {user && <button className="note-important-btn" onClick={handleLike}>{likeLabel}</button>}
+                            <span className='counter'>{note.likes.length - note.dislikes.length}</span>          
+                            {user && <button className='note-important-btn' onClick={dislikeHandler}>{disLike}</button>}
+                        </div>
+                        <div>
+                            <span style={hideWhenVisible} onClick={handleVisible} className='user-likes'>
+                                {note.likes.length > 0
+                                    ? userLikes.length > 0 
+                                        ? <span>liked by: &nbsp;
+                                            <span>
+                                            {
+                                                userLikesDisplay.map(u => {
+                                                    if(u.name === ' and others..'){
+                                                        return <span key={u.name}>and others</span>
+                                                    }else{
+                                                        return <span key={u.id}><Link to={`/users/${u.id}`} >{u.name}, </Link></span>
+                                                    }
+        
+                                                })
+                                            }
+                                            </span>
+                                            
+                                          </span> 
+                                        : <span></span>
+                                    : <span></span>}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="userlikes" style={showWhenVisible}>
+                        <p>liked by:</p>
+                        {
+                            userLikes.map(u => <div key={u.id}><Link to={`/users/${u.id}`} >{u.name}</Link></div>)
+                        }
+                        <p onClick={handleVisible}>hide</p>
+                    </div>
+                </div>
+            )
+            
+        }
+    }
+//---for all users
+    if(!id){
     return (
         
         <div className={'list-child'}>
@@ -74,15 +152,18 @@ const Notes = ({ note, toggleImportance, handleDelete, users, handleDislike }) =
             <UserBanner note={note} author={author} handleDelete={handleDelete}/>
            
             <div className="listContent">
-            <span className='counter'>{note.likes.length - note.dislikes.length}</span>
-            {note.content}
+            {
+                note.content
+            }
+            
             </div>
 
             <div className="listFooter">
                 <div className="likes">
-
-                    {user && <button className="note-important-btn" onClick={handleLike}>{likeLabel}</button>}
-                    {user && <button className='note-important-btn' onClick={dislikeHandler}>{disLike}</button>}
+                   
+                    {note &&<button className="note-important-btn" onClick={handleLike}>{likeLabel}</button>}
+                    <span className='counter'>{note.likes.length - note.dislikes.length}</span>
+                    {note &&<button className='note-important-btn' onClick={dislikeHandler}>{disLike}</button>}
                 </div>
                 <div>
                     <span style={hideWhenVisible} onClick={handleVisible} className='user-likes'>
@@ -95,7 +176,7 @@ const Notes = ({ note, toggleImportance, handleDelete, users, handleDislike }) =
                                             if(u.name === ' and others..'){
                                                 return <span key={u.name}>and others</span>
                                             }else{
-                                                return <span key={u.id}><Link to={`/user/${u.id}`} >{u.name}, </Link></span>
+                                                return <span key={u.id}><Link to={`/users/${u.id}`} >{u.name}, </Link></span>
                                             }
 
                                         })
@@ -111,13 +192,14 @@ const Notes = ({ note, toggleImportance, handleDelete, users, handleDislike }) =
             <div className="userlikes" style={showWhenVisible}>
                 <p>liked by:</p>
                 {
-                    userLikes.map(u => <div key={u.id}><Link to={`/user/${u.id}`} >{u.name}</Link></div>)
+                    userLikes.map(u => <div key={u.id}><Link to={`/users/${u.id}`} >{u.name}</Link></div>)
                 }
                 <p onClick={handleVisible}>hide</p>
             </div>
         </div>
     )
     
+}
 }
  
 export default Notes
