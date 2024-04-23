@@ -42,9 +42,7 @@ const like = async ({ id, note }) => {
 
    const liker = JSON.parse(window.localStorage.getItem('loggedNoteappUser')).userId
 
-   // console.log(note)
-
-   //check if already liked by user
+  
    const liked = note.likes.find(item => item === liker)
    const disliked = note.dislikes.find(item => item === liker)
    if(disliked){  //remove dislike
